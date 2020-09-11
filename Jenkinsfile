@@ -3,7 +3,7 @@ pipeline {
    agent any
 
 
-   triggers {
+  /* triggers {
        // cron('H */8 * * *') //regular builds
         pollSCM('* * * * *') //polling for changes, here once a minute
     }
@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-
+	*/
         stage('Build') {
             // Run the maven build
             steps {
