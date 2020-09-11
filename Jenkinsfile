@@ -3,7 +3,7 @@ pipeline {
    agent any
 
 
-  /* triggers {
+   triggers {
        // cron('H */8 * * *') //regular builds
         pollSCM('* * * * *') //polling for changes, here once a minute
     }
@@ -15,12 +15,12 @@ pipeline {
 
 
                     // Get a code from the server
-                    git 'http://vkuvaev:Password1@localhost/simpleproject.git'
+                    git 'https://github.com/vkuvaev/insecureforum.git'
                     
             }
         }
 
-	*/
+	
         stage('Build') {
             // Run the maven build
             steps {
@@ -48,7 +48,7 @@ pipeline {
             steps{
               
                //clean fortify project folder
-               fortifyClean addJVMOptions: '', buildID: 'fortyfy_test', logFile: '', maxHeap: ''
+               fortifyClean addJVMOptions: '', buildID: 'insecureforum', logFile: '', maxHeap: ''
                
             }
         }
@@ -56,7 +56,7 @@ pipeline {
         stage('Fortify Build Integration'){
             steps{
                // Running build integration phase
-               fortifyTranslate addJVMOptions: '', buildID: 'fortify_test', excludeList: '', logFile: '', maxHeap: '', projectScanType: fortifyOther(otherIncludesList: '', otherOptions: 'mvn -Dmaven.test.failure.ignore package')
+               fortifyTranslate addJVMOptions: '', buildID: 'insecureforum', excludeList: '', logFile: '', maxHeap: '', projectScanType: fortifyOther(otherIncludesList: '', otherOptions: 'mvn -Dmaven.test.failure.ignore package')
            }
         }
 
@@ -64,7 +64,7 @@ pipeline {
         stage('Security Analysis'){
             steps{
                 // Running analysis phase for the build
-                fortifyScan addJVMOptions: '', addOptions: '', buildID: 'fortify_test', customRulepacks: '', logFile: '', maxHeap: '', resultsFile: 'Fortify_pdo.fpr'
+                fortifyScan addJVMOptions: '', addOptions: '', buildID: 'insecureforum', customRulepacks: '', logFile: '', maxHeap: '', resultsFile: 'InsecureForum.fpr'
             }
         }
 
@@ -79,7 +79,7 @@ pipeline {
         stage ('Upload Results to Fortify SSC Server'){
             steps{
                    script { try {
-                         build job: 'Upload_to_SSC', parameters: [string(name: 'newspace', value: 'C:\\Jenkins\\workspace\\Fortify_Scan')]
+                         fortifyUpload appName: 'InsecureForum', appVersion: '1', failureCriteria: '[fortify priority order]:critical OR [fortify priority order]:major', filterSet: '', pollingInterval: '1', resultsFile: 'InsecureForum.fpr'
                          
                     }
                     catch(Exception e) {
